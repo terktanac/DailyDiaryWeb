@@ -21,7 +21,6 @@ app.post("/diary", async (req, res) => {
   const diary = new Diary(payload);
   await diary.save();
   res.status(201).end();
-  console.log(payload);
 });
 app.listen(9000, () => {
   console.log("Application is running on port 9000");

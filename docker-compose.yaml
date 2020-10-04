@@ -1,0 +1,22 @@
+version: "3"
+services:
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+  frontend:
+    build: ./front-end
+    volumes:
+      - ./front-end:/usr/src/app
+    ports:
+      - 3000:3000
+    tty: true
+    command: ["npm", "run", "start"]
+  backend:
+    build: ./back-end
+    tty: true
+    depends_on:
+      - mongo
+    ports:
+      - 9000:9000
+    command: ["npm", "run", "start"]
