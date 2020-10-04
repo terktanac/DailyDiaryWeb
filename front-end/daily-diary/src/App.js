@@ -11,6 +11,8 @@ import CardContent from "@material-ui/core/CardContent";
 import TextField from "@material-ui/core/TextField";
 import { CardHeader } from "@material-ui/core";
 
+import axios from "axios";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -31,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 export default function ButtonAppBar() {
   const classes = useStyles();
   const [diaries, setDiaries] = useState([]);
-  const [lastDate, setLastDate] = useState(Date())
+  const [lastDate, setLastDate] = useState(Date());
   const [newName, setNewName] = useState("");
   const [newText, setNewText] = useState("");
 
@@ -43,34 +45,38 @@ export default function ButtonAppBar() {
     setNewText(e.target.value);
   };
 
-  const handleSubmit = (e) => {
-    const diffTime = Math.abs(lastDate - new Date())
+  const fetchDiaries = () => {
+    axios.get(`http://localhost:9000/diaries`).then((res) => {
+      const fetchedDiaries = res.data;
+      console.log(fetchedDiaries);
+      setDiaries(fetchedDiaries);
+    });
+  };
 
-    console.log(newName);
-    console.log(newText);
-    setNewName("")
-    setNewText("")
-    // send data
+  const updateDiary = (newDiary) => {
+    axios.post(`http://localhost:9000/diary`, { newDiary }).then((res) => {
+      console.log(res);
+      console.log(res.data);
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    const diffTime = Math.abs(lastDate - new Date());
+    const newDiary = {
+      name: newName,
+      date: new Date(),
+      text: newText,
+      color:
+        "#" + ((Math.random() * 0xffffff) << 0).toString(16).padStart(6, "0"),
+    };
+    await updateDiary(newDiary);
+    setNewName("");
+    setNewText("");
+    fetchDiaries();
   };
 
   useEffect(() => {
-    setLastDate(Date("2020"))
-    setDiaries([
-      {
-        name: "Tana",
-        date: new Date(),
-        text:
-          "Tired from senior project. Tired from senior project. Tired from senior project.",
-        color: "#1e4b7c",
-      },
-      {
-        name: "Tana Again",
-        date: new Date(),
-        text: "Tired from SDS hw",
-        color: "#000000",
-      },
-    ]);
-    // fetch data
+    fetchDiaries();
   }, []);
 
   return (
@@ -100,7 +106,7 @@ export default function ButtonAppBar() {
                 {diary.name}
               </Typography>
               <Typography variant="body2" color="textPrimary">
-                {diary.date.toLocaleDateString("en-US")}
+                {new Date(diary.date).toLocaleDateString("en-US")}
               </Typography>
               <br />
               <Typography variant="body1" component="p">
@@ -125,7 +131,7 @@ export default function ButtonAppBar() {
               name ({newName.length} / 10)
             </Typography>
             <TextField
-            value={newName}
+              value={newName}
               variant="outlined"
               size="small"
               onChange={handleNewNameChanged}
@@ -136,7 +142,7 @@ export default function ButtonAppBar() {
               text ({newText.length} / 30)
             </Typography>
             <TextField
-            value={newText}
+              value={newText}
               variant="outlined"
               size="small"
               onChange={handleNewTextChanged}

@@ -1,37 +1,27 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const mongoose = require("mongoose");
-const Diary = require("./diary")
+const Diary = require("./diary");
 
 app.use(express.json());
+app.use(cors());
 
-mongoose.connect("mongodb://localhost:27017/node-api-101", {
+mongoose.connect("mongodb://localhost:27017/SDS_HW", {
   useUnifiedTopology: true,
   useNewUrlParser: true,
 });
 
-// mock data
-const diaries = [
-  {
-    name: "Tana",
-    date: new Date(),
-    text:
-      "Tired from senior project. Tired from senior project. Tired from senior project.",
-    color: "#1e4b7c",
-  },
-  {
-    name: "Tana Again",
-    date: new Date(),
-    text: "Tired from SDS hw",
-    color: "#000000",
-  },
-];
-app.get("/diaries", (req, res) => {
+app.get("/diaries", async (req, res) => {
+  const diaries = await Diary.find({});
   res.json(diaries);
 });
-app.post("/diary", (req, res) => {
-  const payload = req.body;
-  res.json(payload);
+app.post("/diary", async (req, res) => {
+  const payload = req.body.newDiary;
+  const diary = new Diary(payload);
+  await diary.save();
+  res.status(201).end();
+  console.log(payload);
 });
 app.listen(9000, () => {
   console.log("Application is running on port 9000");
